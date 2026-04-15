@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hangman Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #f4f4f4;
+            margin-top: 50px;
+        }
+        
+        h1 {
+            color: #333;
+        }
+        
+        #word {
+            font-size: 2rem;
+            letter-spacing: 10px;
+            margin: 20px 0;
+        }
+        
+        #letters button {
+            margin: 5px;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            background: #3498db;
+            color: white;
+        }
+        
+        #letters button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        #status {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        
+        #restart {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            background: #2ecc71;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🎮 Hangman Game</h1>
+
+    <div id="word"></div>
+    <div id="letters"></div>
+    <div id="status"></div>
+    <button id="restart" onclick="startGame()">Restart Game</button>
+
+    <script>
+        const words = ["apple", "tiger", "chair", "robot", "house"];
+
+        let selectedWord = "";
+        let guessedLetters = [];
+        let wrongGuesses = 0;
+        const maxAttempts = 6;
+
+        function startGame() {
+            selectedWord = words[Math.floor(Math.random() * words.length)];
+            guessedLetters = [];
+            wrongGuesses = 0;
+            document.getElementById("status").innerText = "";
+            createLetterButtons();
+            displayWord();
+        }
+
+        function displayWord() {
+            let display = "";
+            for (let letter of selectedWord) {
+                if (guessedLetters.includes(letter)) {
+                    display += letter + " ";
+                } else {
+                    display += "_ ";
+                }
+            }
+            document.getElementById("word").innerText = display;
+
+            checkWin();
+        }
+
+        function createLetterButtons() {
+            const lettersDiv = document.getElementById("letters");
+            lettersDiv.innerHTML = "";
+
+            for (let i = 97; i <= 122; i++) {
+                const letter = String.fromCharCode(i);
+                const button = document.createElement("button");
+                button.innerText = letter;
+                button.onclick = () => handleGuess(letter, button);
+                lettersDiv.appendChild(button);
+            }
+        }
+
+        function handleGuess(letter, button) {
+            button.disabled = true;
+
+            if (selectedWord.includes(letter)) {
+                guessedLetters.push(letter);
+            } else {
+                wrongGuesses++;
+            }
+
+            updateStatus();
+            displayWord();
+            checkLose();
+        }
+
+        function updateStatus() {
+            document.getElementById("status").innerText =
+                `Wrong guesses left: ${maxAttempts - wrongGuesses}`;
+        }
+
+        function checkWin() {
+            let won = selectedWord.split("").every(letter => guessedLetters.includes(letter));
+            if (won) {
+                document.getElementById("status").innerText = "🎉 You Won!";
+                disableAllButtons();
+            }
+        }
+
+        function checkLose() {
+            if (wrongGuesses >= maxAttempts) {
+                document.getElementById("status").innerText =
+                    `💀 You Lost! Word was: ${selectedWord}`;
+                disableAllButtons();
+            }
+        }
+
+        function disableAllButtons() {
+            const buttons = document.querySelectorAll("#letters button");
+            buttons.forEach(btn => btn.disabled = true);
+        }
+
+        startGame();
+    </script>
+
+</body>
+
+</html>
